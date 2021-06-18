@@ -1,0 +1,104 @@
+Table user {
+  publicId varchar [not null,unique]
+ 
+  fullName varchar [not null]
+  username varchar [not null,unique]
+  mail mail [not null,unique]
+  mailConfirmed boolean [default: false]
+  password varchar [not null]
+  phone long [not null,unique]
+  picture picture
+  userType userType 
+  clubId objectId [default:null,ref: - club._objectId]
+   _objectId objectId [not null,unique]
+}
+
+Table club {
+ 
+  name varchar [not null,unique]
+  description text [not null]
+  picture picture
+  
+  president objectId [ref: - user._objectId]
+  vicePresident objectId [ref: - user._objectId]
+  accountant objectId [ref: - user._objectId]
+  advisor objectId [ref: - user._objectId]
+  
+  communities varchar [pk]
+  activities activity [ref: < activity.name,pk]
+  documents document [ref: < document.name,pk]
+ _objectId objectId [not null,unique]
+ }
+
+Table activity{
+  name varchar
+  description text
+  picture picture
+  status fileStatus
+  startDate datetime
+  endDate datetime
+  eventType eventType
+  departments department [pk]
+  location varchar [pk] 
+  speakers varchar [pk]
+  companies varchar [pk]
+  supporterClubs objectId [pk, ref:< club._objectId]
+  consultant objectId [ref: - user._objectId]
+  reporesenter objectId [ref: - user._objectId]
+
+ 
+}
+
+Table document{
+  name varchar
+  description text
+  status fileStatus
+  date datetime
+  departments department [pk]
+  file file [pk]
+    
+}
+Table chat{
+  users objectId [pk,ref: < user._objectId]
+  messageList message [pk,ref: < message._id] 
+    
+}
+Table message{
+  _id objectId 
+  message text
+  content file
+  date datetime  [default: `now()`]
+ 
+}
+Enum fileStatus{
+  draft
+  requested 
+  created
+  awaiting
+  accepted
+  rejected
+  completed
+}
+Enum eventType{
+    Seminar 
+    Conference 
+    Festival
+    Contest
+    MovieScreening
+    Education 
+    Exhibition 
+    Stand 
+    ClubMeeting
+    Workshop
+    Other
+}
+Enum userType{
+  visitor
+  president [note:"ClubAdmin"]
+  vicePresident [note:"ClubAdmin"]
+  accountant [note:"ClubAdmin"]
+  advisor
+  department
+  administrator
+}
+
