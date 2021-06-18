@@ -20,7 +20,9 @@
 ## API Request List
 ### Pre-Authentication
 ```
-GET /timeline/?f=min,max,club : Returns an array of club activities. Has 3 filters. Min, Max and Club. Min and Max are required for a valid response, returns all elements between last $min and $max. Club is not a mandatory value, which filters response for the given club Id. 
+GET /timeline/?f=min,max,club : Returns an array of club activities. Has 3 filters.
+Min, Max and Club. Min and Max are required for a valid response, returns all elements
+between last $min and $max. Club is not a mandatory value, which filters response for the given club Id. 
 ```
 ### Authentication
 ```
