@@ -20,7 +20,7 @@
 ## API Request List
 ### Pre-Authentication
 
-* `GET /timeline/?f=min,max,club` : Returns an array of club activities. Has 3 filters. Min, Max and Club. Min and Max are required for a valid response, returns all elements between last $min and $max. Club is not a mandatory value, which filters response for the given club Id. 
+* `GET /timeline/?min&max&club` : Returns an array of club activities. Has 3 filters. Min, Max and Club. Min and Max are required for a valid response, returns all elements between last $min and $max. Club is not a mandatory value, which filters response for the given club Id. 
 
 ### Authentication
 * `POST /authenticate/` : Requires body with username and password. Returns the token and public ID of the user.
@@ -80,7 +80,7 @@
   * `DELETE /clubs/object_id/document/document_name` `club_owner` : Deletes an activity.
 
 ### Chat
-
+* `POST /chat/public_id` `everyone` : Sends a message to another user. Can send a file.
 
 
 
