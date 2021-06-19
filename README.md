@@ -39,19 +39,40 @@
 
 * `GET /clubs/f?=` : Returns an array of clubs. Can be filtered. 
 * `GET /clubs/object_id/f?=` : Returns the club with given object_id. Can be filtered. **administrator & advisor & department & club_owners**: `view_all`. **non_club_owners** `view_only accepted & rejected & completed`
-* `GET /clubs/object_id/activities/` Returns an array of club activities. Can be filtered. **administrator & advisor & department & club_owners**: `view_all`. **non_club_owners** `view_only accepted & rejected & completed`
-* `GET /clubs/object_id/activities/activity_name/f?=` : Returns a single activity. Can be filtered.  **administrator & advisor & department & club_owners**: `view_all`. **non_club_owners** `view_only accepted & rejected & completed`
-* `GET /clubs/object_id/documents/` Returns an array of club documents. Can be filtered. **administrator & advisor & department & club_owners**: `view_all`. **non_club_owners** `view_only accepted & rejected & completed`
-* `GET /clubs/object_id/documents/document_name/f?=` : Returns a single document. Can be filtered.  **administrator & advisor & department & club_owners**: `view_all`. **non_club_owners** `view_only accepted & rejected & completed`
-* `POST /clubs/` : Creates a club. Also creaates president, vice_president, accountant and advisor accounts. **administrator** 
-* `POST /clubs/activities/` : Creates an activity. **club owner**
-* `POST /clubs/document/` : Creates an document. **club owner**
-* `PUT /clubs/object_id/`: **club owner** `edit basic_info`. **administrator** `edit_all`
-* `PUT /clubs/object_id/activities/activity_name` : Edits an activity. **club owner** : `edit_all` if `status==draft` else `edit_status` **advisor & department & administrator *-`edit_status`**
-* `PUT /clubs/object_id/document/document_name` : Edits an document.  **club owner** : `edit_all` if `status==draft` else `edit_status` **advisor & department & administrator `edit_status`**
-* `DELETE /clubs/object_id/` : Deletes a club. **administrator** 
-* `DELETE /clubs/object_id/activities/activity_name` : Deletes an activity. **club owner**
-* `DELETE /clubs/object_id/document/document_name` : Deletes an document. **club owner**
+
+
+* `GET /clubs/object_id/activities/` `administrator & advisor & department & club_owners` : Returns an array of club activities. Can be filtered.
+* `GET /clubs/object_id/activities/` `others` : Returns an array of club activities which are accepted, rejected or completed. Can be filtered. 
+* `GET /clubs/object_id/activities/activity_name/f?=` `administrator & advisor & department & club_owners` : Returns a single activity. Can be filtered.  
+* `GET /clubs/object_id/activities/activity_name/f?=` `others` :  : Returns a single activity if it is accepted, rejected or completed. Can be filtered.  
+* `GET /clubs/object_id/documents/` `administrator & advisor & department & club_owners` : Returns an array of club documents. Can be filtered.
+* `GET /clubs/object_id/documents/` `others` : Returns an array of club documents which are accepted, rejected or completed. Can be filtered. 
+* `GET /clubs/object_id/documents/document_name/f?=` `administrator & advisor & department & club_owners` : Returns a single document. Can be filtered.  
+* `GET /clubs/object_id/documents/document_name/f?=` `others` :  : Returns a single document if it is accepted, rejected or completed. Can be filtered.  
+
+
+* `GET /clubs/object_id/communities/` `everyone` :  Returns an array of communities.  
+* `GET /clubs/object_id/communities/community_name` `everyone` :  Returns a single community.  
+
+
+* `POST /clubs/` `administrator` : Creates a club. Also creaates president, vice_president, accountant and advisor accounts. 
+* `POST /clubs/activities/` `club_owner` : Creates an activity.
+* `POST /clubs/document/` `club_owner` : Creates an document.
+* `POST /clubs/communities/community_name` `club_owner` : Creates a community.
+
+
+* `PUT /clubs/object_id/` `club_owner & advisor`: Edits the basic information : Name, description, picture
+* `PUT /clubs/object_id/` `administrator`: Edits the basic information and club owners : Name, description, picture, president, vice_president, accountant, advisor
+
+* `PUT /clubs/object_id/activities/activity_name` `club_owner` if `status==draft` : Edits all informations about the activity. 
+* `PUT /clubs/object_id/activities/activity_name` `club_owner & advisor & department & administrator` : Edits the `status`.
+* `PUT /clubs/object_id/documents/document_name` `club_owner` if `status==draft` : Edits all informations about the document. 
+* `PUT /clubs/object_id/documents/document_name` `club_owner & advisor & department & administrator` : Edits the `status`.
+
+
+* `DELETE /clubs/object_id/` `administrator` : Deletes a club.
+* `DELETE /clubs/object_id/activities/activity_name`  `club_owner` : Deletes an activity.
+* `DELETE /clubs/object_id/document/document_name` `club_owner` : Deletes an activity.
 ### Chat
 
 
