@@ -31,9 +31,10 @@
 * `GET /users/f?=` : Returns an array of users. Can be filtered.
 * `GET /users/online/f?=` : Returns an array of users that are currently online. Can be filtered.
 * `GET /users/public_id/f?=` : Returns the user with given public_id. Can be filtered.
-* `POST /users/` : Creates a user with given properties. **administrator only**
-* `PUT /users/public_id/` : Updates the profile. **profile owner & administrator **
-* `DELETE /users/public_id/` : Deletes the user. **advisor & administrator**
+* `POST /users/` `administrator` : Creates a user with given properties.
+* `PUT /users/public_id/` `profile_owner & administrator` : Updates the profile. 
+* `DELETE /users/public_id/` `advisor & administrator` : Deletes the user.
+
 
 ### Club
 
