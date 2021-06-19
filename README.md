@@ -3,7 +3,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/umutsevdi1/YTU-cms-backend">
-    <img src="https://www.yildiz.edu.tr/images/files/ytulogo.jpg" alt="Logo" width="80" height="80">
+    <img src="http://www.mezun.yildiz.edu.tr/asset/img/logo_zeminsiz-01.png" alt="Logo" width="80" height="80">
   </a>
   
   <h3 align="center">Yıldız Technical University Club Management System API</h3>
