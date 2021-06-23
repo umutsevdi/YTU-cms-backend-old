@@ -22,40 +22,40 @@ public class User {
 	private String picture;
 
 	// Receives JSON generates a new user
-	public User(String json) throws Exception {
-		Document values = Document.parse(json);
-		if (values.containsKey("fullname") && values.containsKey("mail") && values.containsKey("password")
-				&& values.containsKey("year") && values.containsKey("role") && values.containsKey("club")) {
-			this._id = new ObjectId();
+	public User(Document values, boolean isNew) throws Exception {
+		/**
+		 * Receives a JSON String, generates a new user;
+		 */
+		if (isNew) {
+			if (values.containsKey("fullname") && values.containsKey("mail") && values.containsKey("password")
+					&& values.containsKey("year") && values.containsKey("role") && values.containsKey("club")) {
+				this._id = new ObjectId();
+				this.fullname = values.getString("fullname");
+				this.mail = values.getString("mail");
+				this.password = values.getString("password");
+				this.year = values.getInteger("year");
+				this.role = UserType.valueOf(values.getString("role").toUpperCase());
+				this.club = values.getObjectId("club");
+				this.publicId = Model.generatePublicId(6);
+				if (!values.containsKey("picture") || !Model.isURL(values.getString("picture")))
+					values.append("picture", "https://i.gifer.com/1uoA.gif");
+				this.picture = values.getString("picture");
+				this.emailConfirmed = false;
+			} else {
+				throw new Exception("MissingPropertyException");
+			}
+		} else {
+			this._id = values.getObjectId("_id");
 			this.fullname = values.getString("fullname");
 			this.mail = values.getString("mail");
 			this.password = values.getString("password");
 			this.year = values.getInteger("year");
 			this.role = UserType.valueOf(values.getString("role").toUpperCase());
 			this.club = values.getObjectId("club");
-			this.publicId = Model.generatePublicId(6);
-			if (!values.containsKey("picture") || !Model.isURL(values.getString("picture")))
-				values.append("picture", "https://i.gifer.com/1uoA.gif");
+			this.publicId = values.getString("public_id");
 			this.picture = values.getString("picture");
-			this.emailConfirmed = false;
-		} else {
-			throw new Exception("MissingPropertyException");
+			this.emailConfirmed = values.getBoolean("email_confirmed");
 		}
-	}
-
-	// Receives a document, reconstructs an object from it;
-	public User(Document values) throws Exception {
-
-		this._id = values.getObjectId("_id");
-		this.fullname = values.getString("fullname");
-		this.mail = values.getString("mail");
-		this.password = values.getString("password");
-		this.year = values.getInteger("year");
-		this.role = UserType.valueOf(values.getString("role").toUpperCase());
-		this.club = values.getObjectId("club");
-		this.publicId = values.getString("public_id");
-		this.picture = values.getString("picture");
-		this.emailConfirmed = values.getBoolean("email_confirmed");
 
 	}
 

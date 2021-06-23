@@ -7,9 +7,11 @@ import java.util.Optional;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,7 +57,6 @@ public class UserController {
 		} catch (Exception e) {
 			return List.of(new Document().append("Exception", e.getLocalizedMessage()));
 		}
-
 	}
 
 	@GetMapping("/{public_id}")
@@ -83,9 +84,29 @@ public class UserController {
 	}
 
 	@PostMapping(value = { "/" }, consumes = "application/json")
-	public Document createUser(@RequestBody String userDocument) {
+	public Document createUser(@RequestBody Document userDocument) {
 		try {
-			return service.addUser(new User(userDocument)).toDocument(true);
+			return service.addUser(new User(userDocument, true)).toDocument(true);
+		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+			return new Document().append("Exception", e.getLocalizedMessage());
+		}
+	}
+
+	@PutMapping(value = { "/{public_id}" }, consumes = "application/json")
+	public Document editUser(@RequestBody Document userDocument, @PathVariable("public_id") String publicId) {
+		try {
+			return service.editUser(publicId, userDocument);
+		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+			return new Document().append("Exception", e.getLocalizedMessage());
+		}
+	}
+
+	@DeleteMapping("/{public_id}")
+	public Document deleteUser(@PathVariable("public_id") String publicId) {
+		try {
+			return service.deleteUser(publicId);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
