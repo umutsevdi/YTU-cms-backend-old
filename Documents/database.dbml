@@ -1,36 +1,46 @@
 Table user {
-  publicId varchar [not null,unique]
- 
-  fullName varchar [not null]
-  username varchar [not null,unique]
+   _id objectId [not null,unique]
+  club objectId [default:null,ref: - club._id]
+  public_id varchar [not null,unique]
+
+  fullname varchar [not null]
   mail mail [not null,unique]
-  mailConfirmed boolean [default: false]
+  mail_confirmed boolean [default: false]
   password varchar [not null]
   phone long [not null,unique]
   picture picture
-  userType userType 
-  clubId objectId [default:null,ref: - club._objectId]
-   _objectId objectId [not null,unique]
+  user_type userType 
+
+
 }
 
 Table club {
- 
+ _id objectId [not null,unique]
   name varchar [not null,unique]
   description text [not null]
   picture picture
   
-  president objectId [ref: - user._objectId]
-  vicePresident objectId [ref: - user._objectId]
-  accountant objectId [ref: - user._objectId]
-  advisor objectId [ref: - user._objectId]
+  president objectId [ref: - user._id]
+  vicePresident objectId [ref: - user._id]
+  accountant objectId [ref: - user._id]
+  advisor objectId [ref: - user._id]
   
+  past_administration administration_year [ref: < administration_year.year]
   communities varchar [pk]
-  activities activity [ref: < activity.name,pk]
-  documents document [ref: < document.name,pk]
- _objectId objectId [not null,unique]
- }
+  
+  
+  events event [ref: < event._id]
+  documents document [ref: < document._id]
 
-Table activity{
+ }
+Table administration_year {
+  year datetime
+  president objectId
+  vice_president objectId
+  accountant objectId
+}
+Table event{
+  _id objectId
   name varchar
   description text
   picture picture
@@ -42,14 +52,15 @@ Table activity{
   location varchar [pk] 
   speakers varchar [pk]
   companies varchar [pk]
-  supporterClubs objectId [pk, ref:< club._objectId]
-  consultant objectId [ref: - user._objectId]
-  reporesenter objectId [ref: - user._objectId]
+  supporterClubs objectId [pk, ref:< club._id]
+  consultant objectId [ref: - user._id]
+  reporesenter objectId [ref: - user._id]
 
  
 }
 
 Table document{
+  _id objectId
   name varchar
   description text
   status fileStatus
@@ -59,7 +70,7 @@ Table document{
     
 }
 Table chat{
-  users objectId [pk,ref: < user._objectId]
+  users objectId [pk,ref: < user._id]
   messageList message [pk,ref: < message._id] 
     
 }
@@ -84,19 +95,19 @@ Enum eventType{
     Conference 
     Festival
     Contest
-    MovieScreening
+    Movie_Screening
     Education 
     Exhibition 
     Stand 
-    ClubMeeting
+    Club_Meeting
     Workshop
     Other
 }
 Enum userType{
   visitor
-  president [note:"ClubAdmin"]
-  vicePresident [note:"ClubAdmin"]
-  accountant [note:"ClubAdmin"]
+  president [note:"club_admin"]
+  vice_resident [note:"club_admin"]
+  accountant [note:"club_admin"]
   advisor
   department
   administrator

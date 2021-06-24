@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import com.cms.MongoDB;
+import com.model.Model;
 import com.model.User;
 import com.mongodb.client.MongoCursor;
 
@@ -57,6 +58,27 @@ public class UserService {
 
 			MongoDB.getDatabase().getCollection("users").insertOne(user.toDocument(true));
 			return user;
+		} else
+			throw new Exception("ExistingUserException");
+
+	}
+
+	public static ObjectId createClubAccount(Document userDoc, String role, ObjectId clubId) throws Exception {
+		if (!(userDoc.containsKey("fullname") && userDoc.containsKey("mail") && userDoc.containsKey("year"))) {
+			throw new Exception("MissingPropertyAt"+role+"Exception");
+		}
+
+		if (MongoDB.getDatabase().getCollection("users").find(eq("mail", userDoc.getString("mail"))).first() == null) {
+			Document userDocument = new Document();
+			userDocument.append("fullname", userDoc.getString("fullname"));
+			userDocument.append("mail", userDoc.getString("mail"));
+			userDocument.append("password", Model.generatePublicId(10));
+			userDocument.append("year",userDoc.getInteger("year"));			
+			userDocument.append("role",role.toUpperCase());
+			userDocument.append("club", clubId);
+			User user = new User(userDocument,true);
+			MongoDB.getDatabase().getCollection("users").insertOne(user.toDocument(true));
+			return user.get_id();
 		} else
 			throw new Exception("ExistingUserException");
 
