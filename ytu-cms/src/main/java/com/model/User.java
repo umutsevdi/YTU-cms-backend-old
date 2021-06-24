@@ -6,14 +6,13 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 public class User {
-	public static final List<String> components = List.of("_id", "fullname", "mail", "password", "year", "role", "club",
+	public static final List<String> components = List.of("_id", "fullname", "mail", "password", "role", "club",
 			"public_id", "email_confirmed", "picture");
 
 	private final ObjectId _id;
 	private String fullname;
 	private String mail;
 	private String password;
-	private int year;
 	private final UserType role;
 
 	private ObjectId club;
@@ -28,12 +27,11 @@ public class User {
 		 */
 		if (isNew) {
 			if (values.containsKey("fullname") && values.containsKey("mail") && values.containsKey("password")
-					&& values.containsKey("year") && values.containsKey("role") && values.containsKey("club")) {
+					&& values.containsKey("role") && values.containsKey("club")) {
 				this._id = new ObjectId();
 				this.fullname = values.getString("fullname");
 				this.mail = values.getString("mail");
 				this.password = values.getString("password");
-				this.year = values.getInteger("year");
 				this.role = UserType.valueOf(values.getString("role").toUpperCase());
 				this.club = values.getObjectId("club");
 				this.publicId = Model.generatePublicId(6);
@@ -49,7 +47,6 @@ public class User {
 			this.fullname = values.getString("fullname");
 			this.mail = values.getString("mail");
 			this.password = values.getString("password");
-			this.year = values.getInteger("year");
 			this.role = UserType.valueOf(values.getString("role").toUpperCase());
 			this.club = values.getObjectId("club");
 			this.publicId = values.getString("public_id");
@@ -60,28 +57,22 @@ public class User {
 	}
 
 	public Document toDocument(boolean all) {// boolean all
-		Document doc = new Document();
+		Document doc = new Document().append("fullname", fullname).append("mail", mail).append("role", role)
+				.append("club", club).append("role", role.name()).append("public_id", publicId)
+				.append("email_confirmed", emailConfirmed).append("picture", picture);
+
 		if (all) {
 			doc.append("_id", _id);
 			doc.append("password", password);
 		}
-		doc.append("fullname", fullname);
-		doc.append("mail", mail);
-		doc.append("year", year);
-		doc.append("role", role);
-		doc.append("club", club);
-		doc.append("role", role.name());
-		doc.append("public_id", publicId);
-		doc.append("email_confirmed", emailConfirmed);
-		doc.append("picture", picture);
 		return doc;
 	}
 
 	@Override
 	public String toString() {
-		return "User " + _id + " [fullname=" + fullname + ", mail=" + mail + ", password=" + password + ", year=" + year
-				+ ", role=" + role + ", club=" + club + ", publicId=" + publicId + ", emailConfirmed=" + emailConfirmed
-				+ ", picture=" + picture + "]";
+		return "User " + _id + " [fullname=" + fullname + ", mail=" + mail + ", password=" + password + ", role=" + role
+				+ ", club=" + club + ", publicId=" + publicId + ", emailConfirmed=" + emailConfirmed + ", picture="
+				+ picture + "]";
 	}
 
 	public String getFullname() {
@@ -106,14 +97,6 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public int getYear() {
-		return year;
-	}
-
-	public void setYear(int year) {
-		this.year = year;
 	}
 
 	public ObjectId getClub() {
