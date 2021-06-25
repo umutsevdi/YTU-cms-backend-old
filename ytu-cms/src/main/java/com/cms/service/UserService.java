@@ -4,6 +4,7 @@ import static com.mongodb.client.model.Filters.eq;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -16,7 +17,26 @@ import com.mongodb.client.MongoCursor;
 
 @Service
 public class UserService {
-	public ObjectId getObjectId(String publicId) throws Exception {
+	
+	public static boolean mailExists(String mail) throws Exception {
+		String regex = "^(.+)@(.+)$";
+		Pattern pattern = Pattern.compile(regex);
+		if (mail != null || pattern.matcher(mail).matches())
+			return MongoDB.getDatabase().getCollection("users").find(eq("mail", mail)).first()!=null;	
+		else 
+			throw new Exception("InvalidMailException");
+	}
+
+	public static ObjectId getObjectIdFromMail(String mail )throws Exception {
+		try {
+			return MongoDB.getDatabase().getCollection("users").find(eq("mail", mail)).first()
+					.getObjectId("_id");
+		} catch (Exception e) {
+			throw new Exception("UserNotFoundException");
+		}
+	}
+	
+	public static ObjectId getObjectId(String publicId) throws Exception {
 		try {
 			return MongoDB.getDatabase().getCollection("users").find(eq("public_id", publicId)).first()
 					.getObjectId("_id");
@@ -25,29 +45,37 @@ public class UserService {
 		}
 	}
 
-	public User findUser(String publicId) throws Exception {
+	public static String getPublicId(ObjectId id) throws Exception {
 		try {
-			return new User(MongoDB.getDatabase().getCollection("users").find(eq("public_id", publicId)).first(),
+			return MongoDB.getDatabase().getCollection("users").find(eq("_id", id)).first().getString("public_id");
+		} catch (Exception e) {
+			throw new Exception("UserNotFoundException");
+		}
+	}
+
+	public static User findUser(String publicId) throws Exception {
+		try {
+			return User.generate(MongoDB.getDatabase().getCollection("users").find(eq("public_id", publicId)).first(),
 					false);
 		} catch (Exception e) {
 			throw new Exception("UserNotFoundException");
 		}
 	}
 
-	public User findUser(ObjectId id) throws Exception {
+	public static User findUser(ObjectId id) throws Exception {
 		try {
-			return new User(MongoDB.getDatabase().getCollection("users").find(eq("_id", id)).first(), false);
+			return User.generate(MongoDB.getDatabase().getCollection("users").find(eq("_id", id)).first(), false);
 		} catch (Exception e) {
 			throw new Exception("UserNotFoundException");
 		}
 	}
 
-	public List<Document> getUsers() throws Exception {
+	public static List<Document> getUsers() throws Exception {
 		LinkedList<Document> userList = new LinkedList<Document>();
 		MongoCursor<Document> userDocuments = MongoDB.getDatabase().getCollection("users").find().iterator();
 		while (userDocuments.hasNext()) {
 			Document iter = userDocuments.next();
-			userList.add(new User(iter, false).toDocument(false));
+			userList.add(User.generate(iter, false).toDocument(false));
 		}
 		return userList;
 	}
@@ -63,33 +91,15 @@ public class UserService {
 
 	}
 
-	public static ObjectId createClubAccount(Document userDoc, String role, ObjectId clubId) throws Exception {
-		if (!(userDoc.containsKey("fullname") && userDoc.containsKey("mail") && userDoc.containsKey("year"))) {
-			throw new Exception("MissingPropertyAt"+role+"Exception");
-		}
-
-		if (MongoDB.getDatabase().getCollection("users").find(eq("mail", userDoc.getString("mail"))).first() == null) {
-			Document userDocument = new Document();
-			userDocument.append("fullname", userDoc.getString("fullname"));
-			userDocument.append("mail", userDoc.getString("mail"));
-			userDocument.append("password", Model.generatePublicId(10));
-			userDocument.append("year",userDoc.getInteger("year"));			
-			userDocument.append("role",role.toUpperCase());
-			userDocument.append("club", clubId);
-			User user = new User(userDocument,true);
-			MongoDB.getDatabase().getCollection("users").insertOne(user.toDocument(true));
-			return user.get_id();
-		} else
-			throw new Exception("ExistingUserException");
-
-	}
-
 	public Document editUser(String publicId, Document userDocument) throws Exception {
 
 		Document user = findUser(publicId).toDocument(true);
 
 		for (String iter : User.components) {
-			if (userDocument.containsKey(iter) && !iter.equals("_id") && !iter.equals("email_confirmed")) {
+			if (iter.equals("fullname") || iter.equals("mail") || iter.equals("password") || iter.equals("picture")) {
+				if (iter.equals("picture") && !Model.isURL("picture")) {
+					throw new Exception("InvalidURLException");
+				}
 				user.put(iter, userDocument.get(iter));
 			}
 		}

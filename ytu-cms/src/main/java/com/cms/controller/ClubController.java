@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,30 +18,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cms.service.UserService;
+import com.cms.service.ClubService;
+import com.model.Club;
 import com.model.User;
 
 @RestController
-@RequestMapping(path = "api/users/")
-public class UserController {
-
-	private final UserService service;
+@RequestMapping(path = "api/clubs/")
+public class ClubController {
+	private final ClubService service;
 
 	@Autowired
-	public UserController(UserService service) {
+	public ClubController(ClubService service) {
 		this.service = service;
 	}
+	
+	
 
 	@GetMapping()
-	public List<Document> getUsers(@RequestParam Optional<String> f) {
+	public List<Document> getClubs(@RequestParam Optional<String> f) {
 		System.out.println("Get");
 		final String[] filter = f.orElse("").split(",");
 		boolean isFiltered = filter.length > 0 && filter[0] != "";
 		System.out.println("forEach() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
 			List<Document> response = new LinkedList<Document>();
-			UserService.getUsers().forEach(iter -> {
-				System.out.println("->iter\t" + iter.getString("public_id"));
+			ClubService.getClubs().forEach(iter -> {
+				System.out.println("->iter\t" + iter.getObjectId("_id"));
 				if (isFiltered) {
 					Document element = new Document();
 					for (int i = 0; i < filter.length; i++) {
@@ -59,14 +62,14 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/{public_id}")
-	public Document findUser(@PathVariable("public_id") String publicId, @RequestParam Optional<String> f) {
-		System.out.println("Get ID " + publicId);
+	@GetMapping("/{_id}")
+	public Document findUser(@PathVariable("_id") ObjectId _id, @RequestParam Optional<String> f) {
+		System.out.println("Get ID " + _id);
 		final String[] filter = f.orElse("").split(",");
 		boolean isFiltered = filter.length > 0 && filter[0] != "";
 		System.out.println("find() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
-			Document response = UserService.findUser(publicId).toDocument(false);
+			Document response = ClubService.findClub(_id).toDocument(false);
 			if (isFiltered) {
 				Document element = new Document();
 				for (int i = 0; i < filter.length; i++) {
@@ -84,32 +87,33 @@ public class UserController {
 	}
 
 	@PostMapping(value = { "/" }, consumes = "application/json")
-	public Document createUser(@RequestBody Document userDocument) {
+	public Document createClub(@RequestBody Document clubDocument) {
 		try {
-			return service.addUser(User.generate(userDocument, true)).toDocument(true);
+			return service.addClub(Club.generate(clubDocument, true)).toDocument(true);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
 
-	@PutMapping(value = { "/{public_id}" }, consumes = "application/json")
-	public Document editUser(@RequestBody Document userDocument, @PathVariable("public_id") String publicId) {
+	@PutMapping(value = { "/{_id}" }, consumes = "application/json")
+	public Document editUser(@RequestBody Document clubDocument, @PathVariable("_id") ObjectId _id) {
 		try {
-			return service.editUser(publicId, userDocument);
+			return service.editClub(_id, clubDocument);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
 
-	@DeleteMapping("/{public_id}")
-	public Document deleteUser(@PathVariable("public_id") String publicId) {
+	@DeleteMapping("/{_id}")
+	public Document deleteUser(@PathVariable("_id") ObjectId _id) {
 		try {
-			return service.deleteUser(publicId);
+			return service.deleteClub(_id);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
+
 }

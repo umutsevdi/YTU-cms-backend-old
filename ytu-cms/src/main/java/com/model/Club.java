@@ -1,17 +1,18 @@
 package com.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import com.cms.MongoDB;
 import com.cms.service.UserService;
 
 public class Club {
 	public static final List<String> components = List.of("_id", "name", "description", "picture", "president",
-			"vice_president", "accountant", "advisors", "communities", "events", "documents");
+			"vice_president", "accountant", "advisors", "communities", "past_administrations");
 
 	private final ObjectId _id;
 	private String name;
@@ -23,67 +24,95 @@ public class Club {
 	private List<ObjectId> advisors;
 	private HashMap<String, PastAdministration> pastAdministrations;
 	private List<String> communities;
-	private List<ObjectId> events;
-	private List<ObjectId> documents;
 
-//GENERATE A MAP <YEAR><OBJECT ID>
-	// Receives JSON generates a new user
-	public Club(Document values, boolean isNew) throws Exception {
+	private Club(ObjectId _id, String name, String description, String picture, ObjectId president,
+			ObjectId vicePresident, ObjectId accountant, List<ObjectId> advisors,
+			HashMap<String, PastAdministration> pastAdministrations, List<String> communities) {
+		this._id = _id;
+		this.name = name;
+		this.description = description;
+		this.picture = picture;
+		this.president = president;
+		this.vicePresident = vicePresident;
+		this.accountant = accountant;
+		this.advisors = advisors;
+		this.pastAdministrations = pastAdministrations;
+		this.communities = communities;
+	}
+
+	// User will send president: mail
+	public static Club generate(Document values, boolean isNew) throws Exception {
 		if (isNew) {
-			if (values.containsKey("name") && values.containsKey("description") && values.containsKey("picture")
-					&& values.containsKey("advisor") && values.containsKey("president")
+			if (values.containsKey("name") && values.containsKey("advisors") && values.containsKey("president")
 					&& values.containsKey("vice_president") && values.containsKey("accountant")) {
-				this._id = new ObjectId();
-				this.name = values.getString("name");
-				this.description = values.getString("description");
-				this.picture = values.getString("picture");
-				this.president = UserService.createClubAccount((Document) values.get("president"), "President",
-						this._id);
-				this.vicePresident = UserService.createClubAccount((Document) values.get("vice_president"),
-						"Vice_President", this._id);
-				this.accountant = UserService.createClubAccount((Document) values.get("accountant"), "Accountant",
-						this._id);
 
-				this.advisors = values.getList("advisors", ObjectId.class);
-				this.events = new ArrayList<ObjectId>();
-				this.documents = new ArrayList<ObjectId>();
-				this.communities = new ArrayList<String>();
-				this.pastAdministrations = new HashMap<String, PastAdministration>();
-				if (!values.containsKey("picture") || !Model.isURL(values.getString("picture")))
-					values.append("picture", "https://i.gifer.com/1uoA.gif");
-				this.picture = values.getString("picture");
+				ObjectId president, vicePresident, accountant;
+				if (UserService.mailExists(values.getString("president"))) {
+					president = UserService.getObjectIdFromMail(values.getString("president"));
+				} else {
+					president = User.generate(
+							new Document().append("mail", values.getString("president")).append("role", "PRESIDENT"),
+							true).get_id();
+				}
+
+				if (UserService.mailExists(values.getString("vice_president"))) {
+					vicePresident = UserService.getObjectIdFromMail(values.getString("vice_president"));
+				} else {
+					vicePresident = User.generate(new Document().append("mail", values.getString("vice_president"))
+							.append("role", "VICE_PRESIDENT"), true).get_id();
+				}
+
+				if (UserService.mailExists(values.getString("accountant"))) {
+					accountant = UserService.getObjectIdFromMail(values.getString("accountant"));
+				} else {
+					accountant = User.generate(
+							new Document().append("mail", values.getString("accountant")).append("role", "ACCOUNTANT"),
+							true).get_id();
+				}
+				Club club = new Club(new ObjectId(), values.getString("name"), " ", "https://i.gifer.com/1uoA.gif",
+						president, vicePresident, accountant, values.getList("advisors", ObjectId.class),
+						new HashMap<String, PastAdministration>(), new LinkedList<String>());
+				MongoDB.getDatabase().getCollection("club").insertOne(club.toDocument(true));
+				return club;
 			} else {
 				throw new Exception("MissingPropertyException");
 			}
+
 		} else {
-			this._id = values.getObjectId("_id");
-			this.name = values.getString("name");
-			this.description = values.getString("description");
-			this.picture = values.getString("picture");
-			this.president = values.getObjectId("president");
-			this.vicePresident = values.getObjectId("vice_president");
-			this.accountant = values.getObjectId("accountant");
-			this.advisors = values.getList("advisors", ObjectId.class);
-			this.events = values.getList("events", ObjectId.class);
-			this.documents = values.getList("documents", ObjectId.class);
-			this.pastAdministrations = new HashMap<String, PastAdministration>();
-			this.communities = values.getList("communities", String.class);
-			((Document) values.get("past_administration")).forEach((key, value) -> {
-				Document tmp = (Document) value;
-				pastAdministrations.put(key, new PastAdministration(tmp.getObjectId("president"),
-						tmp.getObjectId("vice_president"), tmp.getObjectId("accountant")));
+			HashMap<String, PastAdministration> pastAdministration = new HashMap<String, PastAdministration>();
+			values.forEach((key, value) -> {
+				pastAdministration.put(key,
+						new PastAdministration(((Document) value).getObjectId("president"),
+								((Document) value).getObjectId("vice_president"),
+								((Document) value).getObjectId("accountant")));
 			});
+
+			Club club = new Club(values.getObjectId("_id"), values.getString("name"), values.getString("description"),
+					values.getString("picture"), values.getObjectId("president"), values.getObjectId("vicePresident"),
+					values.getObjectId("accountant"), values.getList("advisors", ObjectId.class), pastAdministration,
+					values.getList("communities", String.class));
+
+			return club;
 		}
 
 	}
 
-	public Document toDocument(boolean all) {// boolean all
+	public Document toDocument(boolean all) throws Exception {// boolean all
 		Document doc = new Document()
 
 				.append("name", name).append("description", description).append("picture", picture)
-				.append("president", president).append("vice_president", vicePresident).append("accountant", accountant)
-				.append("advisors", advisors).append("events", events).append("documents", documents)
-				.append("communities", communities);
+				.append("president", UserService.getPublicId(president))
+				.append("vice_president", UserService.getPublicId(vicePresident))
+				.append("accountant", UserService.getPublicId(accountant)).append("communities", communities);
+		LinkedList<String> advisorList = new LinkedList<String>();
+		advisors.forEach(element -> {
+			try {
+				advisorList.add(UserService.getPublicId(element));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		doc.append("advisors", advisorList);
 		Document tmp = new Document();
 		pastAdministrations.forEach((key, value) -> {
 			tmp.append(key, value.toDocument());
@@ -168,22 +197,6 @@ public class Club {
 		this.communities = communities;
 	}
 
-	public List<ObjectId> getEvents() {
-		return events;
-	}
-
-	public void setEvents(List<ObjectId> events) {
-		this.events = events;
-	}
-
-	public List<ObjectId> getDocuments() {
-		return documents;
-	}
-
-	public void setDocuments(List<ObjectId> documents) {
-		this.documents = documents;
-	}
-
 	public ObjectId get_id() {
 		return _id;
 	}
@@ -193,7 +206,7 @@ public class Club {
 		return "Club [_id=" + _id + ", name=" + name + ", description=" + description + ", picture=" + picture
 				+ ", president=" + president + ", vicePresident=" + vicePresident + ", accountant=" + accountant
 				+ ", advisors=" + advisors + ", pastAdministrations=" + pastAdministrations + ", communities="
-				+ communities + ", events=" + events + ", documents=" + documents + "]";
+				+ communities + "]";
 	}
 
 }
