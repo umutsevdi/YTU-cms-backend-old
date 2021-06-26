@@ -11,7 +11,7 @@ import com.cms.service.UserService;
 
 public class Event {
 	public static final List<String> components = List.of("_id", "name", "description", "picture", "club", "start_date",
-			"end_date", "status", "deparments", "representer", "supporter_clubs", "location", "speakers", "companies");
+			"end_date", "status", "departments", "representer", "supporter_clubs", "location", "speakers", "companies");
 
 	private final ObjectId _id;
 	private final String name;
@@ -156,8 +156,14 @@ public class Event {
 		return status;
 	}
 
-	public void setStatus(StatusType status) {
-		this.status = status;
+	public void setStatus(Boolean accepted) {
+		if (accepted) {
+			if (!this.status.toString().equals("COMPLETED"))
+				this.status = StatusType.values()[this.status.ordinal() + 1];
+		} else {
+			this.status = StatusType.DRAFT;
+		}
+
 	}
 
 	public HashMap<ObjectId, Boolean> getDepartments() {

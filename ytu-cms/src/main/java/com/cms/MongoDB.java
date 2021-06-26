@@ -24,9 +24,9 @@ public class MongoDB {
 			collectionList.remove(iter);
 		});
 		collectionList.forEach(iter->{
-			System.out.println("DatabaseControl | not exist | "+iter+"\t| creating |");
+			System.out.println("DatabaseControl | not exist | "+iter+"\t|");
 			mongoClient.getDatabase(database).createCollection(iter);
-			System.out.println("                | status    | done      |");
+			System.out.println("                | create    | done      |");
 			
 		});
 

@@ -32,8 +32,6 @@ public class ClubController {
 		this.service = service;
 	}
 	
-	
-
 	@GetMapping()
 	public List<Document> getClubs(@RequestParam Optional<String> f) {
 		System.out.println("Get");
