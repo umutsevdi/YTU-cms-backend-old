@@ -9,7 +9,7 @@ import com.cms.MongoDB;
 
 public class User {
 	public static final List<String> components = List.of("_id", "fullname", "mail", "password", "role", "club",
-			"public_id", "email_confirmed", "picture");
+			"public_id", "email_confirmed");
 	private final ObjectId _id;
 	private String fullname;
 	private String mail;
@@ -19,11 +19,10 @@ public class User {
 	private ObjectId club;
 	private final String publicId;
 	private boolean emailConfirmed;
-	private String picture;
 	private boolean isActivated;
 
 	private User(ObjectId _id, String fullname, String mail, String password, UserType role, ObjectId club,
-			String publicId, boolean emailConfirmed, String picture, boolean isActivated) {
+			String publicId, boolean emailConfirmed, boolean isActivated) {
 		this._id = _id;
 		this.fullname = fullname;
 		this.mail = mail;
@@ -32,7 +31,6 @@ public class User {
 		this.club = club;
 		this.publicId = publicId;
 		this.emailConfirmed = emailConfirmed;
-		this.picture = picture;
 		this.isActivated = isActivated;
 	}
 
@@ -42,7 +40,7 @@ public class User {
 				try {
 					User user = new User(new ObjectId(), " ", values.getString("mail"), Model.generatePublicId(10),
 							UserType.valueOf(values.getString("role").toUpperCase()), values.getObjectId("club"),
-							values.getString("public_id"), false, "https://i.gifer.com/1uoA.gif", false);
+							values.getString("public_id"), false, false);
 					MongoDB.getDatabase().getCollection("users").insertOne(user.toDocument(true));
 					return user;
 				} catch (Exception e) {
@@ -57,7 +55,7 @@ public class User {
 			User user = new User(values.getObjectId("_id"), values.getString("fullname"), values.getString("mail"),
 					values.getString("password"), UserType.valueOf(values.getString("role").toUpperCase()),
 					values.getObjectId("club"), values.getString("public_id"), values.getBoolean("email_confirmed"),
-					values.getString("picture"), values.getBoolean("is_activated"));
+					values.getBoolean("is_activated"));
 			return user;
 		}
 	}
@@ -65,7 +63,7 @@ public class User {
 	public Document toDocument(boolean all) {// boolean all
 		Document doc = new Document().append("fullname", fullname).append("mail", mail).append("role", role)
 				.append("club", club).append("role", role.name()).append("public_id", publicId)
-				.append("email_confirmed", emailConfirmed).append("picture", picture);
+				.append("email_confirmed", emailConfirmed);
 
 		if (all) {
 			doc.append("_id", _id);
@@ -122,14 +120,6 @@ public class User {
 		this.emailConfirmed = emailConfirmed;
 	}
 
-	public String getPicture() {
-		return picture;
-	}
-
-	public void setPicture(String picture) {
-		this.picture = picture;
-	}
-
 	public boolean isActivated() {
 		return isActivated;
 	}
@@ -150,7 +140,7 @@ public class User {
 	public String toString() {
 		return "User [_id=" + _id + ", fullname=" + fullname + ", mail=" + mail + ", password=" + password + ", role="
 				+ role + ", club=" + club + ", publicId=" + publicId + ", emailConfirmed=" + emailConfirmed
-				+ ", picture=" + picture + ", isActivated=" + isActivated + "]";
+				+ ", isActivated=" + isActivated + "]";
 	}
 
 }

@@ -48,7 +48,7 @@ public class ClubService {
 		Document club = findClub(id).toDocument(true);
 
 		for (String iter : Club.components) {
-			if(iter.equals("name") || iter.equals("description") || iter.equals("picture") || iter.equals("communities")) {
+			if(iter.equals("name") || iter.equals("description") || iter.equals("communities")) {
 				club.put(iter, clubDocument.get(iter));
 			}else {
 				throw new Exception("InvalidPropertyRequestException");

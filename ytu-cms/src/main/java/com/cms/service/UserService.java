@@ -11,7 +11,6 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import com.cms.MongoDB;
-import com.model.Model;
 import com.model.User;
 import com.mongodb.client.MongoCursor;
 
@@ -96,10 +95,7 @@ public class UserService {
 		Document user = findUser(publicId).toDocument(true);
 
 		for (String iter : User.components) {
-			if (iter.equals("fullname") || iter.equals("mail") || iter.equals("password") || iter.equals("picture")) {
-				if (iter.equals("picture") && !Model.isURL("picture")) {
-					throw new Exception("InvalidURLException");
-				}
+			if (iter.equals("fullname") || iter.equals("mail") || iter.equals("password")) {
 				user.put(iter, userDocument.get(iter));
 			}
 		}

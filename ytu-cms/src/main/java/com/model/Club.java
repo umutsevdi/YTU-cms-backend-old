@@ -10,13 +10,12 @@ import org.bson.types.ObjectId;
 import com.cms.service.UserService;
 
 public class Club {
-	public static final List<String> components = List.of("_id", "name", "description", "picture", "president",
-			"vice_president", "accountant", "advisors", "communities", "past_administrations");
+	public static final List<String> components = List.of("_id", "name", "description", "president", "vice_president",
+			"accountant", "advisors", "communities", "past_administrations");
 
 	private final ObjectId _id;
 	private String name;
 	private String description;
-	private String picture;
 	private ObjectId president;
 	private ObjectId vicePresident;
 	private ObjectId accountant;
@@ -24,13 +23,12 @@ public class Club {
 	private HashMap<String, PastAdministration> pastAdministrations;
 	private List<String> communities;
 
-	private Club(ObjectId _id, String name, String description, String picture, ObjectId president,
-			ObjectId vicePresident, ObjectId accountant, List<ObjectId> advisors,
-			HashMap<String, PastAdministration> pastAdministrations, List<String> communities) {
+	private Club(ObjectId _id, String name, String description, ObjectId president, ObjectId vicePresident,
+			ObjectId accountant, List<ObjectId> advisors, HashMap<String, PastAdministration> pastAdministrations,
+			List<String> communities) {
 		this._id = _id;
 		this.name = name;
 		this.description = description;
-		this.picture = picture;
 		this.president = president;
 		this.vicePresident = vicePresident;
 		this.accountant = accountant;
@@ -68,8 +66,8 @@ public class Club {
 							new Document().append("mail", values.getString("accountant")).append("role", "ACCOUNTANT"),
 							true).get_id();
 				}
-				Club club = new Club(new ObjectId(), values.getString("name"), " ", "https://i.gifer.com/1uoA.gif",
-						president, vicePresident, accountant, values.getList("advisors", ObjectId.class),
+				Club club = new Club(new ObjectId(), values.getString("name"), " ", president, vicePresident,
+						accountant, values.getList("advisors", ObjectId.class),
 						new HashMap<String, PastAdministration>(), new LinkedList<String>());
 				return club;
 			} else {
@@ -86,7 +84,7 @@ public class Club {
 			});
 
 			Club club = new Club(values.getObjectId("_id"), values.getString("name"), values.getString("description"),
-					values.getString("picture"), values.getObjectId("president"), values.getObjectId("vicePresident"),
+					values.getObjectId("president"), values.getObjectId("vicePresident"),
 					values.getObjectId("accountant"), values.getList("advisors", ObjectId.class), pastAdministration,
 					values.getList("communities", String.class));
 
@@ -98,7 +96,7 @@ public class Club {
 	public Document toDocument(boolean all) throws Exception {// boolean all
 		Document doc = new Document()
 
-				.append("name", name).append("description", description).append("picture", picture)
+				.append("name", name).append("description", description)
 				.append("president", UserService.getPublicId(president))
 				.append("vice_president", UserService.getPublicId(vicePresident))
 				.append("accountant", UserService.getPublicId(accountant)).append("communities", communities);
@@ -137,14 +135,6 @@ public class Club {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public String getPicture() {
-		return picture;
-	}
-
-	public void setPicture(String picture) {
-		this.picture = picture;
 	}
 
 	public ObjectId getPresident() {
@@ -201,10 +191,9 @@ public class Club {
 
 	@Override
 	public String toString() {
-		return "Club [_id=" + _id + ", name=" + name + ", description=" + description + ", picture=" + picture
-				+ ", president=" + president + ", vicePresident=" + vicePresident + ", accountant=" + accountant
-				+ ", advisors=" + advisors + ", pastAdministrations=" + pastAdministrations + ", communities="
-				+ communities + "]";
+		return "Club [_id=" + _id + ", name=" + name + ", description=" + description + ", president=" + president
+				+ ", vicePresident=" + vicePresident + ", accountant=" + accountant + ", advisors=" + advisors
+				+ ", pastAdministrations=" + pastAdministrations + ", communities=" + communities + "]";
 	}
 
 }

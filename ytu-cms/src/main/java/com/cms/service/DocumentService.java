@@ -48,7 +48,7 @@ public class DocumentService {
 			MongoDB.getDatabase().getCollection("documents").insertOne(doc.toDocument(true));
 			return doc;
 		} else
-			throw new Exception("ExistingUserException");
+			throw new Exception("ExistingDocumentException");
 
 	}
 	

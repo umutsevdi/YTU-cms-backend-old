@@ -1,5 +1,9 @@
 package com.cms.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +12,11 @@ import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,13 +26,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.cms.YtuCmsApplication;
 import com.cms.service.ClubService;
 import com.model.Club;
 
 @RestController
 @RequestMapping(path = "api/clubs/")
 public class ClubController {
+	private static String UPLOADED_FOLDER = YtuCmsApplication.path + "/images/clubs/";
 	private final ClubService service;
 
 	@Autowired
@@ -111,6 +123,42 @@ public class ClubController {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
+	}
+	
+	@GetMapping(value = "/{_id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+	public ResponseEntity<Resource> downloadImage(@PathVariable("_id") ObjectId _id) throws IOException {
+		ByteArrayResource inputStream;
+		try {
+			inputStream = new ByteArrayResource(
+					Files.readAllBytes(Paths.get(UPLOADED_FOLDER + _id)));
+			return ResponseEntity.status(HttpStatus.OK).contentLength(inputStream.contentLength()).body(inputStream);
+		} catch (IOException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ByteArrayResource(null));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ByteArrayResource(null));
+		}
+
+	}
+
+	@PostMapping("/{_id}/image")
+	public Document uploadImage(@PathVariable("_id") ObjectId _id, @RequestParam("file") MultipartFile file) {
+		if (file.isEmpty()) {
+			System.out.println("NoFileException");
+			return new Document().append("Exception", "NoFileException");
+		}
+
+		try {
+			byte[] bytes = file.getBytes();
+			Path path = Paths.get(UPLOADED_FOLDER + _id);
+			Files.write(path, bytes);
+
+			return new Document().append("Status", "Success");
+		} catch (IOException e) {
+			return new Document().append("Exception", "CorruptFileException");
+		} catch (Exception e) {
+			return new Document().append("Exception", "CorruptFileException");
+		}
+
 	}
 
 }
