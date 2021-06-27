@@ -7,11 +7,12 @@ import java.util.List;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.stereotype.Service;
 
 import com.cms.MongoDB;
 import com.model.Event;
 import com.mongodb.client.MongoCursor;
-
+@Service
 public class EventService {
 	public static List<Event> findClubEvents(ObjectId id) throws Exception{
 		LinkedList<Event> documents = new LinkedList<Event>();

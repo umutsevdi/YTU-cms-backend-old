@@ -7,11 +7,12 @@ import java.util.List;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.stereotype.Service;
 
 import com.cms.MongoDB;
 import com.model.ClubDocument;
 import com.mongodb.client.MongoCursor;
-
+@Service
 public class DocumentService {
 	
 	public static List<ClubDocument> findClubDocuments(ObjectId id) throws Exception{
