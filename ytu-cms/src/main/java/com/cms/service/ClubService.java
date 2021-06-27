@@ -40,7 +40,7 @@ public class ClubService {
 			MongoDB.getDatabase().getCollection("clubs").insertOne(club.toDocument(true));
 			return club;
 		} else
-			throw new Exception("ExistingUserException");
+			throw new Exception("ClubNotFoundException");
 
 	}
 	public Document editClub(ObjectId id, Document clubDocument) throws Exception {

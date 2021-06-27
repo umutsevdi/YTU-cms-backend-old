@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cms.service.ClubService;
 import com.model.Club;
-import com.model.User;
 
 @RestController
 @RequestMapping(path = "api/clubs/")
@@ -45,7 +44,7 @@ public class ClubController {
 				if (isFiltered) {
 					Document element = new Document();
 					for (int i = 0; i < filter.length; i++) {
-						if (User.components.contains(filter[i])) {
+						if (Club.components.contains(filter[i])) {
 							element.append(filter[i], iter.get(filter[i]));
 						}
 					}
@@ -71,7 +70,7 @@ public class ClubController {
 			if (isFiltered) {
 				Document element = new Document();
 				for (int i = 0; i < filter.length; i++) {
-					if (User.components.contains(filter[i])) {
+					if (Club.components.contains(filter[i])) {
 						element.append(filter[i], response.get(filter[i]));
 					}
 				}

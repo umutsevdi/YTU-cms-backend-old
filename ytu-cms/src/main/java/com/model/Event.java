@@ -68,7 +68,7 @@ public class Event {
 						e.printStackTrace();
 					}
 				});
-				Event event = new Event(values.getObjectId("_id"), values.getString("name"),
+				Event event = new Event(new ObjectId(), values.getString("name"),
 						values.getString("description"), values.getString("picture"), values.getObjectId("club"),
 						values.getDate("start_date"), values.getDate("end_date"), StatusType.DRAFT, map,
 						values.getString("representer"), values.getList("supporter_clubs", ObjectId.class),

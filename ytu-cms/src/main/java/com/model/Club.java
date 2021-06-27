@@ -7,7 +7,6 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.cms.MongoDB;
 import com.cms.service.UserService;
 
 public class Club {
@@ -72,7 +71,6 @@ public class Club {
 				Club club = new Club(new ObjectId(), values.getString("name"), " ", "https://i.gifer.com/1uoA.gif",
 						president, vicePresident, accountant, values.getList("advisors", ObjectId.class),
 						new HashMap<String, PastAdministration>(), new LinkedList<String>());
-				MongoDB.getDatabase().getCollection("club").insertOne(club.toDocument(true));
 				return club;
 			} else {
 				throw new Exception("MissingPropertyException");
