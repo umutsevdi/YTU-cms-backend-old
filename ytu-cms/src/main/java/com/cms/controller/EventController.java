@@ -170,8 +170,10 @@ public class EventController {
 			System.out.println("NoFileException");
 			return new Document().append("Exception", "NoFileException");
 		}
-
 		try {
+			String extentionName = Controller.getExtensionByStringHandling(file.getName()).orElseThrow().toLowerCase();
+			if (!(extentionName.equals("png") || extentionName.equals("jpg") || extentionName.equals("jpeg")))
+				throw new Exception("WrongFileFormatException");
 			byte[] bytes = file.getBytes();
 			Path path = Paths.get(UPLOADED_FOLDER + _id);
 			Files.write(path, bytes);

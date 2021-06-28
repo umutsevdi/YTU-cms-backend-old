@@ -148,6 +148,9 @@ public class UserController {
 		}
 
 		try {
+			String extentionName = Controller.getExtensionByStringHandling(file.getName()).orElseThrow().toLowerCase();
+			if (!(extentionName.equals("png") || extentionName.equals("jpg") || extentionName.equals("jpeg")))
+				throw new Exception("WrongFileFormatException");
 			byte[] bytes = file.getBytes();
 			Path path = Paths.get(UPLOADED_FOLDER + UserService.getObjectId(publicId));
 			Files.write(path, bytes);

@@ -42,7 +42,7 @@ public class ClubController {
 	public ClubController(ClubService service) {
 		this.service = service;
 	}
-	
+
 	@GetMapping()
 	public List<Document> getClubs(@RequestParam Optional<String> f) {
 		System.out.println("Get");
@@ -124,13 +124,12 @@ public class ClubController {
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
-	
+
 	@GetMapping(value = "/{_id}/image", produces = MediaType.IMAGE_PNG_VALUE)
 	public ResponseEntity<Resource> downloadImage(@PathVariable("_id") ObjectId _id) throws IOException {
 		ByteArrayResource inputStream;
 		try {
-			inputStream = new ByteArrayResource(
-					Files.readAllBytes(Paths.get(UPLOADED_FOLDER + _id)));
+			inputStream = new ByteArrayResource(Files.readAllBytes(Paths.get(UPLOADED_FOLDER + _id)));
 			return ResponseEntity.status(HttpStatus.OK).contentLength(inputStream.contentLength()).body(inputStream);
 		} catch (IOException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ByteArrayResource(null));
@@ -148,6 +147,9 @@ public class ClubController {
 		}
 
 		try {
+			String extentionName = Controller.getExtensionByStringHandling(file.getName()).orElseThrow().toLowerCase();
+			if (!(extentionName.equals("png") || extentionName.equals("jpg") || extentionName.equals("jpeg")))
+				throw new Exception("WrongFileFormatException");
 			byte[] bytes = file.getBytes();
 			Path path = Paths.get(UPLOADED_FOLDER + _id);
 			Files.write(path, bytes);

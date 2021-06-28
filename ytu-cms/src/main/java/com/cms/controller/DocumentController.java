@@ -172,6 +172,9 @@ public class DocumentController {
 					clubDocument.remove("path");
 			} else {
 				try {
+					String extentionName = Controller.getExtensionByStringHandling(file.getName()).orElseThrow().toLowerCase();
+					if (!(extentionName.equals("rar") || extentionName.equals("zip") || extentionName.equals("pdf")))
+						throw new Exception("WrongFileFormatException");
 					byte[] bytes = file.getBytes();
 					Path path = Paths.get(UPLOADED_FOLDER + _id);
 					Files.write(path, bytes);
