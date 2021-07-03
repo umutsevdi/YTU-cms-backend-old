@@ -7,7 +7,8 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.cms.service.UserService;
+import com.cms.MongoDB;
+import com.mongodb.client.model.Filters;
 
 public class Event {
 	public static final List<String> components = List.of("_id", "name", "description", "club", "start_date",
@@ -20,7 +21,7 @@ public class Event {
 	private Date startDate;
 	private Date endDate;
 	private StatusType status;
-	private HashMap<ObjectId, Boolean> departments;
+	private HashMap<String, Boolean> departments;
 	private String representer; // mail
 	private List<ObjectId> supporterClubs;
 	private String location;
@@ -28,8 +29,8 @@ public class Event {
 	private List<String> companies;
 
 	private Event(ObjectId _id, String name, String description, ObjectId club, Date startDate, Date endDate,
-			StatusType status, HashMap<ObjectId, Boolean> departments, String representer,
-			List<ObjectId> supporterClubs, String location, List<String> speakers, List<String> companies) {
+			StatusType status, HashMap<String, Boolean> departments, String representer, List<ObjectId> supporterClubs,
+			String location, List<String> speakers, List<String> companies) {
 		this._id = _id;
 		this.name = name;
 		this.description = description;
@@ -55,11 +56,11 @@ public class Event {
 				}
 				if (!isValid)
 					throw new Exception("MissingPropertyException");
-
-				HashMap<ObjectId, Boolean> map = new HashMap<ObjectId, Boolean>();
+				// Change this line when location => department is implemented
+				HashMap<String, Boolean> map = new HashMap<String, Boolean>();
 				values.getList("departments", String.class).forEach((key) -> {
 					try {
-						map.put(UserService.getObjectId(key), false);
+						map.put(key, false);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -69,16 +70,17 @@ public class Event {
 						StatusType.DRAFT, map, values.getString("representer"),
 						values.getList("supporter_clubs", ObjectId.class), values.getString("location"),
 						values.getList("speakers", String.class), values.getList("companies", String.class));
+				MongoDB.getDatabase().getCollection("events").insertOne(event.toDocument(true));
 				return event;
 			} catch (Exception e) {
 				throw new Exception(e.getLocalizedMessage());
 			}
 
 		} else {
-			HashMap<ObjectId, Boolean> map = new HashMap<ObjectId, Boolean>();
+			HashMap<String, Boolean> map = new HashMap<String, Boolean>();
 			((Document) values.get("departments")).forEach((key, value) -> {
 				try {
-					map.put(UserService.getObjectId(key), (Boolean) value);
+					map.put(key, (Boolean) value);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -93,26 +95,13 @@ public class Event {
 		}
 	}
 
-	public Document toDocument(boolean all) throws Exception {
+	public Document toDocument(boolean all) {
 
-		Document map = new Document();
-		departments.forEach((key, value) -> {
-			try {
-				map.append(UserService.getPublicId(key), value);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
-		Document doc = new Document()
-
-				.append("name", name).append("description", description).append("club", club)
-				.append("start_date", startDate).append("end_date", endDate).append("status", status.toString())
-				.append("departments", map).append("representer", representer).append("supporter_clubs", supporterClubs)
+		return new Document().append("_id", _id).append("name", name).append("description", description)
+				.append("club", club).append("start_date", startDate).append("end_date", endDate)
+				.append("status", status.toString()).append("departments", departments)
+				.append("representer", representer).append("supporter_clubs", supporterClubs)
 				.append("location", location).append("speakers", speakers).append("companies", companies);
-		if (all) {
-			doc.append("_id", _id);
-		}
-		return doc;
 	}
 
 	public String getDescription() {
@@ -153,11 +142,11 @@ public class Event {
 
 	}
 
-	public HashMap<ObjectId, Boolean> getDepartments() {
+	public HashMap<String, Boolean> getDepartments() {
 		return departments;
 	}
 
-	public void setDepartments(HashMap<ObjectId, Boolean> departments) {
+	public void setDepartments(HashMap<String, Boolean> departments) {
 		this.departments = departments;
 	}
 
@@ -221,4 +210,7 @@ public class Event {
 				+ location + ", speakers=" + speakers + ", companies=" + companies + "]";
 	}
 
+	public void updateDatabase() {
+		MongoDB.getDatabase().getCollection("events").findOneAndReplace(Filters.eq("_id", _id), this.toDocument(true));
+	}
 }

@@ -29,12 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cms.YtuCmsApplication;
-import com.cms.service.DocumentService;
 import com.cms.service.EventService;
 import com.model.Event;
 
 @RestController
-@RequestMapping(path = "api/events/")
+@RequestMapping(path = "api/events")
 public class EventController {
 	private static String UPLOADED_FOLDER = YtuCmsApplication.path + "/images/events/";
 
@@ -45,7 +44,7 @@ public class EventController {
 		this.service = service;
 	}
 
-	@GetMapping()
+	@GetMapping("/")
 	public List<Document> getDocuments(@RequestParam Optional<String> f) {
 		System.out.println("Get");
 		final String[] filter = f.orElse("").split(",");
@@ -53,7 +52,7 @@ public class EventController {
 		System.out.println("forEach() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
 			List<Document> response = new LinkedList<Document>();
-			DocumentService.getDocuments().forEach(iter -> {
+			EventService.getDocuments().forEach(iter -> {
 				System.out.println("->iter\t" + iter.getObjectId("_id"));
 				if (isFiltered) {
 					Document element = new Document();
@@ -82,7 +81,7 @@ public class EventController {
 		try {
 
 			List<Document> response = new LinkedList<Document>();
-			DocumentService.findClubDocuments(id).forEach(key -> {
+			EventService.findClubEvents(id).forEach(key -> {
 				Document iter = key.toDocument(true);
 				System.out.println("->iter\t" + iter.getObjectId("_id"));
 				if (isFiltered) {
@@ -104,14 +103,14 @@ public class EventController {
 	}
 
 	@GetMapping("/{club_id}/{_id}")
-	public Document findUser(@PathVariable("club_id") ObjectId clubId, @PathVariable("_id") ObjectId _id,
+	public Document findEvent(@PathVariable("club_id") ObjectId clubId, @PathVariable("_id") ObjectId _id,
 			@RequestParam Optional<String> f) {
 		System.out.println("Get ID " + _id);
 		final String[] filter = f.orElse("").split(",");
 		boolean isFiltered = filter.length > 0 && filter[0] != "";
 		System.out.println("find() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
-			Document response = DocumentService.findDocument(_id).toDocument(false);
+			Document response = EventService.findEvent(_id).get().toDocument(false);
 			if (isFiltered) {
 				Document element = new Document();
 				for (int i = 0; i < filter.length; i++) {
@@ -130,9 +129,9 @@ public class EventController {
 
 	@PostMapping(value = { "/" }, consumes = "application/json")
 	@ResponseBody
-	public Document postDocument(@RequestBody Document clubDocument) {
+	public Document postDocument(@RequestBody Document document) {
 		try {
-			return service.addDocument(Event.generate(clubDocument, true)).toDocument(true);
+			return service.addDocument(document).toDocument(true);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
@@ -141,7 +140,7 @@ public class EventController {
 
 	@PutMapping(value = { "/{_id}" }, consumes = "application/json")
 	@ResponseBody
-	public Document editUser(@RequestBody Document clubDocument, @PathVariable("_id") ObjectId _id) {
+	public Document editEvent(@RequestBody Document clubDocument, @PathVariable("_id") ObjectId _id) {
 		try {
 			return service.editDocument(_id, clubDocument);
 		} catch (Exception e) {

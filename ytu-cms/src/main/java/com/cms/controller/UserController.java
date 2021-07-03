@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -32,7 +33,7 @@ import com.cms.service.UserService;
 import com.model.User;
 
 @RestController
-@RequestMapping(path = "api/users/")
+@RequestMapping(path = "api/users")
 public class UserController {
 	private static String UPLOADED_FOLDER = YtuCmsApplication.path + "/images/users/";
 
@@ -43,7 +44,7 @@ public class UserController {
 		this.service = service;
 	}
 
-	@GetMapping()
+	@GetMapping("/")
 	public List<Document> getUsers(@RequestParam Optional<String> f) {
 		System.out.println("Get");
 		final String[] filter = f.orElse("").split(",");
@@ -71,14 +72,14 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/{public_id}")
-	public Document findUser(@PathVariable("public_id") String publicId, @RequestParam Optional<String> f) {
-		System.out.println("Get ID " + publicId);
+	@GetMapping("/{_id}")
+	public Document findUser(@PathVariable("_id") ObjectId _id, @RequestParam Optional<String> f) {
+		System.out.println("Get ID " + _id);
 		final String[] filter = f.orElse("").split(",");
 		boolean isFiltered = filter.length > 0 && filter[0] != "";
 		System.out.println("find() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
-			Document response = UserService.findUser(publicId).toDocument(false);
+			Document response = UserService.findUser(_id).get().toDocument();
 			if (isFiltered) {
 				Document element = new Document();
 				for (int i = 0; i < filter.length; i++) {
@@ -98,39 +99,39 @@ public class UserController {
 	@PostMapping(value = { "/" }, consumes = "application/json")
 	public Document createUser(@RequestBody Document userDocument) {
 		try {
-			return service.addUser(User.generate(userDocument, true)).toDocument(true);
+			return service.addUser(userDocument).toDocument();
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
 
-	@PutMapping(value = { "/{public_id}" }, consumes = "application/json")
-	public Document editUser(@RequestBody Document userDocument, @PathVariable("public_id") String publicId) {
+	@PutMapping(value = { "/{_id}" }, consumes = "application/json")
+	public Document editUser(@RequestBody Document userDocument, @PathVariable("_id") ObjectId _id) {
 		try {
-			return service.editUser(publicId, userDocument);
+			return service.editUser(_id, userDocument);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
 
-	@DeleteMapping("/{public_id}")
-	public Document deleteUser(@PathVariable("public_id") String publicId) {
+	@DeleteMapping("/{_id}")
+	public Document deleteUser(@PathVariable("_id") ObjectId _id) {
 		try {
-			return service.deleteUser(publicId);
+			return service.deleteUser(_id);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
 	}
 
-	@GetMapping(value = "/{public_id}/image", produces = MediaType.IMAGE_PNG_VALUE)
-	public ResponseEntity<Resource> downloadImage(@PathVariable("public_id") String publicId) throws IOException {
+	@GetMapping(value = "/{_id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+	public ResponseEntity<Resource> downloadImage(@PathVariable("_id") ObjectId _id) throws IOException {
 		ByteArrayResource inputStream;
 		try {
 			inputStream = new ByteArrayResource(
-					Files.readAllBytes(Paths.get(UPLOADED_FOLDER + UserService.getObjectId(publicId))));
+					Files.readAllBytes(Paths.get(UPLOADED_FOLDER + _id.toString())));
 			return ResponseEntity.status(HttpStatus.OK).contentLength(inputStream.contentLength()).body(inputStream);
 		} catch (IOException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ByteArrayResource(null));
@@ -140,8 +141,8 @@ public class UserController {
 
 	}
 
-	@PostMapping("/{public_id}/image")
-	public Document uploadImage(@PathVariable("public_id") String publicId, @RequestParam("file") MultipartFile file) {
+	@PostMapping("/{_id}/image")
+	public Document uploadImage(@PathVariable("_id") ObjectId _id, @RequestParam("file") MultipartFile file) {
 		if (file.isEmpty()) {
 			System.out.println("NoFileException");
 			return new Document().append("Exception", "NoFileException");
@@ -152,7 +153,7 @@ public class UserController {
 			if (!(extentionName.equals("png") || extentionName.equals("jpg") || extentionName.equals("jpeg")))
 				throw new Exception("WrongFileFormatException");
 			byte[] bytes = file.getBytes();
-			Path path = Paths.get(UPLOADED_FOLDER + UserService.getObjectId(publicId));
+			Path path = Paths.get(UPLOADED_FOLDER + _id.toString());
 			Files.write(path, bytes);
 			return new Document().append("Status", "Success");
 		} catch (IOException e) {

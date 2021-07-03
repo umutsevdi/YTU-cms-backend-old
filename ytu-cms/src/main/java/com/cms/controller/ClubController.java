@@ -33,7 +33,7 @@ import com.cms.service.ClubService;
 import com.model.Club;
 
 @RestController
-@RequestMapping(path = "api/clubs/")
+@RequestMapping(path = "api/clubs")
 public class ClubController {
 	private static String UPLOADED_FOLDER = YtuCmsApplication.path + "/images/clubs/";
 	private final ClubService service;
@@ -43,7 +43,7 @@ public class ClubController {
 		this.service = service;
 	}
 
-	@GetMapping()
+	@GetMapping("/")
 	public List<Document> getClubs(@RequestParam Optional<String> f) {
 		System.out.println("Get");
 		final String[] filter = f.orElse("").split(",");
@@ -78,7 +78,7 @@ public class ClubController {
 		boolean isFiltered = filter.length > 0 && filter[0] != "";
 		System.out.println("find() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
-			Document response = ClubService.findClub(_id).toDocument(false);
+			Document response = ClubService.findClub(_id).get().toDocument();
 			if (isFiltered) {
 				Document element = new Document();
 				for (int i = 0; i < filter.length; i++) {
@@ -96,9 +96,9 @@ public class ClubController {
 	}
 
 	@PostMapping(value = { "/" }, consumes = "application/json")
-	public Document createClub(@RequestBody Document clubDocument) {
+	public Document createClub(@RequestBody Document document) {
 		try {
-			return service.addClub(Club.generate(clubDocument, true)).toDocument(true);
+			return service.addClub(document).toDocument();
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
@@ -106,7 +106,7 @@ public class ClubController {
 	}
 
 	@PutMapping(value = { "/{_id}" }, consumes = "application/json")
-	public Document editUser(@RequestBody Document clubDocument, @PathVariable("_id") ObjectId _id) {
+	public Document editClub(@RequestBody Document clubDocument, @PathVariable("_id") ObjectId _id) {
 		try {
 			return service.editClub(_id, clubDocument);
 		} catch (Exception e) {
@@ -116,7 +116,7 @@ public class ClubController {
 	}
 
 	@DeleteMapping("/{_id}")
-	public Document deleteUser(@PathVariable("_id") ObjectId _id) {
+	public Document deleteClub(@PathVariable("_id") ObjectId _id) {
 		try {
 			return service.deleteClub(_id);
 		} catch (Exception e) {
@@ -161,6 +161,24 @@ public class ClubController {
 			return new Document().append("Exception", "CorruptFileException");
 		}
 
+	}
+	
+	@PutMapping(value = { "/{_id}/assign/" }, consumes = "application/json")
+	public Document assign(@PathVariable("_id") ObjectId _id, @RequestBody Document document) {
+		System.out.println("Assign Leaders");
+		if (document.containsKey("president") || document.containsKey("vice_president") || document.containsKey("accountant")) {
+			try {
+				return service.assingLeaders(_id,document);
+			}catch(Exception e) {
+				System.out.println("MissingPropertiesException");
+				return new Document().append("Exception", e.getLocalizedMessage());
+			}
+			
+		}else {
+			System.out.println("MissingPropertiesException");
+			return new Document().append("Exception", "MissingPropertyException");
+		}
+		
 	}
 
 }

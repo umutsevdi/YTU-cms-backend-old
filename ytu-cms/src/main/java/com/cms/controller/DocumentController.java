@@ -13,6 +13,11 @@ import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +34,7 @@ import com.cms.service.DocumentService;
 import com.model.ClubDocument;
 
 @RestController
-@RequestMapping(path = "api/documents/")
+@RequestMapping(path = "api/documents")
 public class DocumentController {
 	private static String UPLOADED_FOLDER = YtuCmsApplication.path + "/documents/" + LocalDate.now().getYear() + "/";
 
@@ -40,7 +45,7 @@ public class DocumentController {
 		this.service = service;
 	}
 
-	@GetMapping()
+	@GetMapping("/")
 	public List<Document> getDocuments(@RequestParam Optional<String> f) {
 		System.out.println("Get");
 		final String[] filter = f.orElse("").split(",");
@@ -78,7 +83,7 @@ public class DocumentController {
 
 			List<Document> response = new LinkedList<Document>();
 			DocumentService.findClubDocuments(id).forEach(key -> {
-				Document iter = key.toDocument(true);
+				Document iter = key.toDocument();
 				System.out.println("->iter\t" + iter.getObjectId("_id"));
 				if (isFiltered) {
 					Document element = new Document();
@@ -106,7 +111,7 @@ public class DocumentController {
 		boolean isFiltered = filter.length > 0 && filter[0] != "";
 		System.out.println("find() do filter :" + isFiltered + "(" + Arrays.asList(filter).toString() + ")");
 		try {
-			Document response = DocumentService.findDocument(_id).toDocument(false);
+			Document response = DocumentService.findDocument(_id).get().toDocument();
 			if (isFiltered) {
 				Document element = new Document();
 				for (int i = 0; i < filter.length; i++) {
@@ -125,33 +130,10 @@ public class DocumentController {
 
 	@PostMapping(value = { "/" }, consumes = "application/json")
 	@ResponseBody
-	public Document postDocument(@RequestParam("file") MultipartFile file, @RequestBody Document clubDocument) {
+	public Document postDocument(@RequestBody Document document) {
 		System.out.println("Post requested");
-		ClubDocument document;
-
 		try {
-			document = ClubDocument.generate(clubDocument, true);
-		} catch (Exception e) { // ERROR CASE
-			System.out.println(e.getLocalizedMessage());
-			return new Document().append("Exception", e.getLocalizedMessage());
-		}
-		if (!file.isEmpty()) {
-			try {
-				// SUCCESS CASE
-				byte[] bytes = file.getBytes();
-				Path path = Paths.get(UPLOADED_FOLDER + document.get_id());
-				Files.write(path, bytes);
-				System.out.println(file.getName() + " is successfully written as " + document.get_id());
-				document.setPath(UPLOADED_FOLDER + document.get_id());
-
-			} catch (IOException e) {
-				System.out.println(e.getLocalizedMessage());
-				return new Document().append("Exception", e.getLocalizedMessage());
-			}
-		}
-		try {
-			service.addDocument(document);
-			return document.toDocument(true);
+			return service.addDocument(document).toDocument();
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
@@ -161,36 +143,53 @@ public class DocumentController {
 
 	@PutMapping(value = { "/{_id}" }, consumes = "application/json")
 	@ResponseBody
-	public Document editUser(@RequestParam("file") MultipartFile file, @RequestBody Document clubDocument,
-			@PathVariable("_id") ObjectId _id) {
+	public Document editUser(@RequestBody Document clubDocument, @PathVariable("_id") ObjectId _id) {
 		try {
 
-			ClubDocument doc = DocumentService.findDocument(_id);
-			System.out.println("Put "+doc.get_id());
-			if (file.isEmpty()) {
-				if (clubDocument.containsKey("path"))
-					clubDocument.remove("path");
-			} else {
-				try {
-					String extentionName = Controller.getExtensionByStringHandling(file.getName()).orElseThrow().toLowerCase();
-					if (!(extentionName.equals("rar") || extentionName.equals("zip") || extentionName.equals("pdf")))
-						throw new Exception("WrongFileFormatException");
-					byte[] bytes = file.getBytes();
-					Path path = Paths.get(UPLOADED_FOLDER + _id);
-					Files.write(path, bytes);
-					System.out.println(file.getName() + " is successfully updated as " + _id);
-					clubDocument.put("path", UPLOADED_FOLDER + _id);
-
-				} catch (IOException e) {
-					System.out.println(e.getLocalizedMessage());
-					return new Document().append("Exception", e.getLocalizedMessage());
-				}
-			}
+			ClubDocument doc = DocumentService.findDocument(_id).get();
+			System.out.println("Put " + doc.get_id());
 			return service.editDocument(_id, clubDocument);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 			return new Document().append("Exception", e.getLocalizedMessage());
 		}
+	}
+
+	@GetMapping(value = "/{_id}/file", produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<Resource> downloadImage(@PathVariable("_id") ObjectId _id) throws IOException {
+		ByteArrayResource inputStream;
+		try {
+			inputStream = new ByteArrayResource(Files.readAllBytes(Paths.get(UPLOADED_FOLDER + _id)));
+			return ResponseEntity.status(HttpStatus.OK).contentLength(inputStream.contentLength()).body(inputStream);
+		} catch (IOException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ByteArrayResource(null));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ByteArrayResource(null));
+		}
+
+	}
+
+	@PostMapping("/{_id}/file")
+	public Document uploadImage(@PathVariable("_id") ObjectId _id, @RequestParam("file") MultipartFile file) {
+		if (file.isEmpty()) {
+			System.out.println("NoFileException");
+			return new Document().append("Exception", "NoFileException");
+		}
+		try {
+			String extentionName = Controller.getExtensionByStringHandling(file.getName()).orElseThrow().toLowerCase();
+			if (!(extentionName.equals("pdf") || extentionName.equals("rar") || extentionName.equals("zip")))
+				throw new Exception("WrongFileFormatException");
+			byte[] bytes = file.getBytes();
+			Path path = Paths.get(UPLOADED_FOLDER + _id);
+			Files.write(path, bytes);
+
+			return new Document().append("Status", "Success");
+		} catch (IOException e) {
+			return new Document().append("Exception", "CorruptFileException");
+		} catch (Exception e) {
+			return new Document().append("Exception", "CorruptFileException");
+		}
+
 	}
 
 }

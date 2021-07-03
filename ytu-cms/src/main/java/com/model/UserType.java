@@ -1,7 +1,7 @@
 package com.model;
 
 public enum UserType {
-	VISITOR,
+	UNASSIGNED,  //Person who exists on database but has no access
 	PRESIDENT,
 	VICE_PRESIDENT,
 	ACCOUNTANT,

@@ -9,6 +9,9 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import com.cms.MongoDB;
+import com.mongodb.client.model.Filters;
+
 public class ClubDocument {
 	public static final List<String> components = List.of("_id", "name", "description", "club", "date", "status",
 			"path");
@@ -45,6 +48,7 @@ public class ClubDocument {
 				ClubDocument document = new ClubDocument(values.getObjectId("_id"), values.getString("name"),
 						values.getString("description"), values.getObjectId("club"), values.getDate("date"),
 						StatusType.DRAFT, "");
+				MongoDB.getDatabase().getCollection("documents").insertOne(document.toDocument());
 				return document;
 			} catch (Exception e) {
 				throw new Exception(e.getLocalizedMessage());
@@ -59,17 +63,13 @@ public class ClubDocument {
 		}
 	}
 
-	public Document toDocument(boolean all) {
-		Document doc = new Document().append("name", name).append("description", description).append("club", club)
-				.append("date", date).append("status", status.toString()).append("path", path);
-		if (all) {
-			doc.append("_id", _id);
-		}
-		return doc;
+	public Document toDocument() {
+		return new Document().append("_id", _id).append("name", name).append("description", description)
+				.append("club", club).append("date", date).append("status", status.toString()).append("path", path);
 	}
-	
+
 	public File getFile() {
-		Path path = Paths.get(this.path); 
+		Path path = Paths.get(this.path);
 		return path.toFile();
 	}
 
@@ -115,6 +115,10 @@ public class ClubDocument {
 
 	public ObjectId getClub() {
 		return club;
+	}
+
+	public void updateDatabase() {
+		MongoDB.getDatabase().getCollection("documents").findOneAndReplace(Filters.eq("_id", _id), this.toDocument());
 	}
 
 }
