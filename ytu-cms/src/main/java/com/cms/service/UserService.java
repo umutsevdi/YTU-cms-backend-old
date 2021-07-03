@@ -67,14 +67,12 @@ public class UserService {
 		Document user = findUser(_id).get().toDocument();
 
 		for (String iter : document.keySet()) {
-			if (iter.equals("fullname") || iter.equals("mail") || iter.equals("password")) {
-				if (iter.equals("password")) {
-					user.put(iter, Model.getSHA(document.getString(iter)));
-				} else {
-					user.put(iter, document.get(iter));
-				}
-
+			if (iter.equals("fullname")) {
+				user.put(iter, document.get(iter));
+			} else if (iter.equals("password")) {
+				user.put(iter, Model.getSHA(document.getString(iter)));
 			}
+
 		}
 		MongoDB.getDatabase().getCollection("users").findOneAndReplace(eq("_id", _id), user);
 		return user;
