@@ -19,9 +19,11 @@ public class YtuCmsApplication {
 	public static final List<String> folders = List.of("", "documents", "images", "tmp");
 
 	public static void main(String[] args) {
-		final String uri ="mongodb://localhost:27017/?readPreference=primary&appname=SimpleSolution&ssl=false";
-		//"mongodb://localhost:27017/?readPreference=primary&appname=SimpleSolution&ssl=false"; local uri
-		//"mongodb+srv://dbAdmin:qssUbEBV8Dh3cnUs@sat.6wtix.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"; server uri
+		final String uri = "mongodb://localhost:27017/?readPreference=primary&appname=SimpleSolution&ssl=false";
+		// "mongodb://localhost:27017/?readPreference=primary&appname=SimpleSolution&ssl=false";
+		// local uri
+		// "mongodb+srv://dbAdmin:qssUbEBV8Dh3cnUs@sat.6wtix.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+		// server uri
 		final String database = "cms";
 
 		SpringApplication.run(YtuCmsApplication.class, args);

@@ -17,20 +17,18 @@ public class MongoDB {
 		mongoClient = MongoClients.create(uri);
 		System.out.println("MongoDB Opened");
 		ArrayList<String> collectionList = new ArrayList<String>();
-		collectionList.addAll(List.of("users","clubs","documents","events","chats"));
+		collectionList.addAll(List.of("users", "clubs", "documents", "events", "chats"));
 		MongoIterable<String> collections = mongoClient.getDatabase(database).listCollectionNames();
-		collections.forEach(iter ->{
-			System.out.println("DatabaseControl | exist     | "+iter+"\t|");
+		collections.forEach(iter -> {
+			System.out.println("DatabaseControl | exist     | " + iter + "\t|");
 			collectionList.remove(iter);
 		});
-		collectionList.forEach(iter->{
-			System.out.println("DatabaseControl | not exist | "+iter+"\t|");
+		collectionList.forEach(iter -> {
+			System.out.println("DatabaseControl | not exist | " + iter + "\t|");
 			mongoClient.getDatabase(database).createCollection(iter);
 			System.out.println("                | create    | done      |");
-			
-		});
 
-		
+		});
 
 	}
 
