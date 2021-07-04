@@ -9,6 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import com.cms.YtuCmsApplication;
+import com.cms.service.ClubService;
+import com.model.Club;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.cms.YtuCmsApplication;
-import com.cms.service.ClubService;
-import com.model.Club;
 
 @RestController
 @RequestMapping(path = "api/clubs")
@@ -162,23 +162,24 @@ public class ClubController {
 		}
 
 	}
-	
+
 	@PutMapping(value = { "/{_id}/assign/" }, consumes = "application/json")
 	public Document assign(@PathVariable("_id") ObjectId _id, @RequestBody Document document) {
 		System.out.println("Assign Leaders");
-		if (document.containsKey("president") || document.containsKey("vice_president") || document.containsKey("accountant")) {
+		if (document.containsKey("president") || document.containsKey("vice_president")
+				|| document.containsKey("accountant")) {
 			try {
-				return service.assingLeaders(_id,document);
-			}catch(Exception e) {
+				return service.assingLeaders(_id, document);
+			} catch (Exception e) {
 				System.out.println("MissingPropertiesException");
 				return new Document().append("Exception", e.getLocalizedMessage());
 			}
-			
-		}else {
+
+		} else {
 			System.out.println("MissingPropertiesException");
 			return new Document().append("Exception", "MissingPropertyException");
 		}
-		
+
 	}
 
 }
