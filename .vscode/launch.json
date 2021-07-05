@@ -1,19 +1,8 @@
 {
-   "configurations": [
-        /*{
-            "type": "java",
-            "name": "Spring Boot-YtuCmsApplication<ytu-cms>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "mainClass": "com.cms.YtuCmsApplication",
-            "projectName": "ytu-cms",
-            "args": ""
-        },*/
-    
+    "configurations": [
         {
             "type": "java",
-            "name": "cms<cms>",
+            "name": "Spring Boot-CmsApplication<cms>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
