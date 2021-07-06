@@ -31,9 +31,9 @@ public class CmsApplication {
 			for (String beanName : beanNames) {
 				System.out.println(beanName);
 			}
-			for(int i = 0 ; i < 20 ; i++){
+			for(int i = 0 ; i < 6 ; i++){
 				try{
-					User user = new User("name"+i, "mail"+i, "password", 0L, true, true, Role.ADMIN);
+					User user = new User(""+Math.random()*i*10, "mail"+i+Math.random()*10, "password", 0L, true, true, Role.ADMIN);
 					ctx.getBean(UserService.class).insertElement(user);
 				}catch(Exception e){
 					System.out.println(e);
