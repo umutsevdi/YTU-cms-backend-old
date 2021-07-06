@@ -1,6 +1,8 @@
 package com.cms.models;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 import com.mongodb.lang.NonNull;
 
@@ -8,9 +10,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.CredentialsContainer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Document(collection = "users")
-public class User {
+public class User implements UserDetails, CredentialsContainer{
     @Id
     private String id;
     private String name;
@@ -110,5 +115,37 @@ public class User {
     public void setRegistrationDate(LocalDate registrationDate) {
         this.registrationDate = registrationDate;
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+       return List.of(role);
+    }
+
+    @Override
+    public String getUsername() {
+        return this.mail;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return mailConfirmed;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public void eraseCredentials() {
+        
+    }
+
+    
 
 }

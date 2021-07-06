@@ -11,8 +11,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @SpringBootApplication
+@EnableMongoRepositories
 public class CmsApplication {
 
 	public static void main(String[] args) {
@@ -23,6 +26,7 @@ public class CmsApplication {
 	@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
 		return args -> {
+			
 
 			System.out.println("Let's inspect the beans provided by Spring Boot:");
 		
@@ -33,7 +37,7 @@ public class CmsApplication {
 			}
 			for(int i = 0 ; i < 6 ; i++){
 				try{
-					User user = new User(""+Math.random()*i*10, "mail"+i+Math.random()*10, "password", 0L, true, true, Role.ADMIN);
+					User user = new User(""+Math.random()*i*10, "mail"+i+Math.random()*10,BCrypt.hashpw("password", BCrypt.gensalt()), 0L, true, true, Role.ADMIN);
 					ctx.getBean(UserService.class).insertElement(user);
 				}catch(Exception e){
 					System.out.println(e);

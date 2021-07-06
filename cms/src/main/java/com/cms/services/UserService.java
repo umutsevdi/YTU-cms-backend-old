@@ -23,14 +23,14 @@ public class UserService {
     }
 
     public User findByMail(String mail){
-        return repository.findUserByMail(mail).get();
+        return repository.findByMail(mail).get();
     }
 
     public void insertElement(User user){
         repository.insert(user);
     }
-    public void editElement(String id,Optional<String> password,){
-        User user = repository.findById(id).get();
+    public void editElement(String id,Optional<String> password){
+        //User user = repository.findById(id).get();
         
     }
 
