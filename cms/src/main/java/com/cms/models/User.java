@@ -10,12 +10,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Document(collection = "users")
-public class User implements UserDetails, CredentialsContainer{
+public class User implements UserDetails {
     @Id
     private String id;
     private String name;
@@ -26,6 +25,7 @@ public class User implements UserDetails, CredentialsContainer{
     private long phone;
     private boolean mailConfirmed;
     private boolean enabled;
+    private boolean registered;
     private Role role;
     @CreatedDate
     private LocalDate registrationDate;
@@ -33,14 +33,15 @@ public class User implements UserDetails, CredentialsContainer{
     public User() {
     }
 
-    public User(String name, String mail, String password, long phone, boolean mailConfirmed,
-            boolean enabled, Role role) {
+    public User(String name, String mail, String password, long phone, boolean mailConfirmed, boolean enabled,boolean registered,
+            Role role) {
         this.name = name;
         this.mail = mail;
         this.password = password;
         this.phone = phone;
         this.mailConfirmed = mailConfirmed;
         this.enabled = enabled;
+        this.registered=registered;
         this.role = role;
     }
 
@@ -118,7 +119,16 @@ public class User implements UserDetails, CredentialsContainer{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-       return List.of(role);
+        return List.of(role);
+    }
+    
+
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
     }
 
     @Override
@@ -138,14 +148,15 @@ public class User implements UserDetails, CredentialsContainer{
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return registered;
     }
 
     @Override
-    public void eraseCredentials() {
-        
+    public String toString() {
+        return "User [enabled=" + enabled + ", id=" + id + ", mail=" + mail + ", mailConfirmed=" + mailConfirmed
+                + ", name=" + name + ", password=" + password + ", phone=" + phone + ", registered=" + registered
+                + ", registrationDate=" + registrationDate + ", role=" + role + "]";
     }
-
     
 
 }
