@@ -2,7 +2,7 @@ package com.cms.repositories;
 
 import java.util.Optional;
 
-import com.cms.models.User;
+import com.cms.models.documents.User;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
