@@ -1,4 +1,4 @@
-package com.cms.models;
+package com.cms.models.documents;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.mongodb.lang.NonNull;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -23,25 +24,23 @@ public class User implements UserDetails {
     private String mail;
     private String password;
     private long phone;
-    private boolean mailConfirmed;
-    private boolean enabled;
-    private boolean registered;
+    private boolean mailConfirmed=false;
+    private boolean enabled=true;
+    private boolean registered=false;
     private Role role;
     @CreatedDate
     private LocalDate registrationDate;
+    @Value("${cms.security.key}")
+    private String customPropertyTest;
 
     public User() {
     }
 
-    public User(String name, String mail, String password, long phone, boolean mailConfirmed, boolean enabled,boolean registered,
-            Role role) {
+    public User(String name, String mail, String password, long phone, Role role) {
         this.name = name;
         this.mail = mail;
         this.password = password;
         this.phone = phone;
-        this.mailConfirmed = mailConfirmed;
-        this.enabled = enabled;
-        this.registered=registered;
         this.role = role;
     }
 
@@ -121,7 +120,6 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(role);
     }
-    
 
     public boolean isRegistered() {
         return registered;
@@ -138,17 +136,28 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return enabled;
+        return true;
+        
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return mailConfirmed;
+        return enabled;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return registered;
+        return mailConfirmed;
+    }
+
+    
+
+    public String getCustomPropertyTest() {
+        return customPropertyTest;
+    }
+
+    public void setCustomPropertyTest(String customPropertyTest) {
+        this.customPropertyTest = customPropertyTest;
     }
 
     @Override
@@ -157,6 +166,5 @@ public class User implements UserDetails {
                 + ", name=" + name + ", password=" + password + ", phone=" + phone + ", registered=" + registered
                 + ", registrationDate=" + registrationDate + ", role=" + role + "]";
     }
-    
 
 }

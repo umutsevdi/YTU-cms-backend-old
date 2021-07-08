@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @SpringBootApplication
 @EnableMongoRepositories
 public class CmsApplication {
-
+	public static final String link = "http://localhost:8080";
 	public static void main(String[] args) {
 		SpringApplication.run(CmsApplication.class, args);
 	}

@@ -21,6 +21,12 @@ services:
     #        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
     #        - ME_CONFIG_MONGODB_ADMINPASSWORD=8hNfbhPlDXfZ4Hqs37qV
     #        - ME_CONFIG_MONGODB_SERVER=mongodb   
+    mail:
+        image: maildev/maildev
+        ports:
+          - "1025:25"
+          - "1080:80"
+          
 volumes:
     data: {}
 networks:

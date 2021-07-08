@@ -1,28 +1,51 @@
 package com.cms.controllers;
 
-import com.cms.models.Role;
-import com.cms.models.User;
-import com.cms.models.requests.RegistrationRequest;
+import com.cms.models.documents.Role;
+import com.cms.models.documents.User;
+import com.cms.models.registration.RegistrationRequest;
+import com.cms.services.MailConfirmationTokenService;
 import com.cms.services.UserService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.AllArgsConstructor;
+
 @RestController
-@RequestMapping("/api/authentication")
+@RequestMapping("/auth")
+@AllArgsConstructor
 public class AuthenticationController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final MailConfirmationTokenService mailConfirmationTokenService;
+   
 
     @PostMapping(path = "/register")
-    public User register(@RequestBody RegistrationRequest request) {
-        return userService.insertElement(
-                new User(request.getName(), request.getMail(), request.getPassword(), 0L, true, true, true,Role.ADMIN));
+    public User register(@RequestBody RegistrationRequest request) throws Exception {
+        try{
+            
+            User user = userService.insertElement(
+                new User(request.getName(), request.getMail(), request.getPassword(), 0L,Role.ADMIN));
+            mailConfirmationTokenService.sendToken(request);
+            return user;
 
+        }catch(Exception e){
+            throw new Exception(e.getMessage());
+        }
+   
+    }
+    @GetMapping(path="/confirm")
+    public String confirmMail(@RequestParam("token") String token) throws Exception{
+        try{
+            mailConfirmationTokenService.confirmMail(token);
+            return "Mail Hesabın Onaylandı";
+        }catch(Exception e){
+            throw new Exception(e.getMessage());
+        }
+        
     }
 
     @GetMapping(path = "/login")

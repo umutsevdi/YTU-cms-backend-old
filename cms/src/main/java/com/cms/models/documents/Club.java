@@ -1,4 +1,4 @@
-package com.cms.models;
+package com.cms.models.documents;
 
 import java.time.LocalDate;
 import java.util.HashMap;

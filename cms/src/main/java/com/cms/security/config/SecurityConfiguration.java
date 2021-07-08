@@ -2,7 +2,6 @@ package com.cms.security.config;
 
 import com.cms.services.UserService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -12,21 +11,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import lombok.AllArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
+@AllArgsConstructor
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder;
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
             .csrf()
             .disable()
             .authorizeRequests()
-            .antMatchers("/api/authentication/**").permitAll()
+            .antMatchers("/auth/**").permitAll()
             .anyRequest().authenticated().and().formLogin();
     }
 
