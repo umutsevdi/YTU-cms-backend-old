@@ -7,6 +7,8 @@
   </a>
   
   <h3 align="center">Yıldız Technical University Club Management System API</h3>
+  <h4 align="center">(Depreciated)</h4>
+  
   
    <a href="https://github.com/umutsevdi/YTU-cms-frontend">
     <p align="center">Frontend Page</p>
